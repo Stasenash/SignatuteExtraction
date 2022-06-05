@@ -21,7 +21,7 @@ constant_parameter_3 = 100
 constant_parameter_4 = 18
 
 # read the input image
-img = cv2.imread('./inputs/in3.jpg', 0)
+img = cv2.imread('./inputs/in9.png', 0)
 img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)[1]  # ensure binary
 
 # connected component analysis by scikit-learn framework

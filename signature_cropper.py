@@ -5,7 +5,7 @@ from skimage.color import label2rgb
 from skimage.measure import regionprops
 import numpy as np
 
-delta = 20
+delta = 19
 
 
 class Point:
@@ -18,9 +18,17 @@ class Area:
     def __init__(self, topLeft):
         self.topLeft = topLeft
         self.bottomRight = topLeft
+        self.tlPoint = topLeft
+        self.brPoint = topLeft
 
-    def changeBottomRight(self, bottomRight):
-        self.bottomRight = bottomRight
+    def changeRightAndLeft(self, point):
+        self.bottomRight = point
+        brX = point.x if self.brPoint.x < point.x else self.brPoint.x
+        brY = point.y if self.brPoint.y < point.y else self.brPoint.y
+        tlX = point.x if self.tlPoint.x > point.x else self.tlPoint.x
+        tlY = point.y if self.tlPoint.y > point.y else self.tlPoint.y
+        self.brPoint = Point(brX, brY)
+        self.tlPoint = Point(tlX, tlY)
 
     def isInArea(self, point):
         flag = False
@@ -54,7 +62,7 @@ def getAreaIndex(areaList, point):
     return -1
 
 
-img = cv2.imread('./inputs/in4.png', 0)
+img = cv2.imread('./inputs/in5.png', 0)
 
 # список всех областей с подписями
 list = []
@@ -74,20 +82,17 @@ for y in range(img.shape[0]):
                 currentAreaIndex = len(list)
             else:
                 # если входит в какую-то область, то обновляем у нее правую нижнюю точку
-                list[index].changeBottomRight(point)
+                list[index].changeRightAndLeft(point)
 
 print("found " + str(len(list)) + " areas")
 for area in list:
     area.print(list.index(area))
-    img = cv2.rectangle(img, (area.topLeft.x, area.topLeft.y),
-                        (area.bottomRight.x, area.bottomRight.y),
+    # old_img = cv2.imread('./inputs/in3.jpg', 0)
+    croppedArea = img[area.tlPoint.y - 50:area.brPoint.y + 50, area.tlPoint.x - 50:area.brPoint.x + 50]
+    cv2.imwrite('area'+str(list.index(area))+'.png', croppedArea)
+    img = cv2.rectangle(img, (area.tlPoint.x, area.tlPoint.y),
+                        (area.brPoint.x, area.brPoint.y),
                         (127, 127, 127),
                         1)
 
-    # minX = min(area.topLeft.x, area.bottomRight.x)
-    # maxX = max(area.topLeft.x, area.bottomRight.x)
-    # minY = min(area.bottomRight.y, area.topLeft.y)
-    # maxY = max(area.bottomRight.y, area.topLeft.y)
-    # croppedArea = img[minX:maxX, minY:maxY]
-    # cv2.imwrite('area'+str(list.index(area))+'.png', croppedArea)
-cv2.imwrite('ch2.png', img)
+cv2.imwrite('ch5.png', img)
